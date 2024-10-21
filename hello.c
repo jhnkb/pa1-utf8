@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 
 // ****FUNCTIONS - MILESTONE 1****
@@ -144,22 +143,22 @@ int32_t utf8_strlen(char str[])
 
     while(str[index] != '\0')
     {
-        if (str[index] >= 0b00000000 && str[index] <= 0b11111111)
+        if (str[index] >= 0b00000000 || str[index] <= 0b11111111)
         {
             count++;
             index++;
         }
-        else if ((str[index] & 0b11100000) == 0b11000000)
+        else if ((str[index] & 0b11000000) == 0b11000000)
         {
             count ++;
             index += 2;
         }
-        else if ((str[index] & 0b11110000) == 0b11100000)
+        else if ((str[index] & 0b11100000) == 0b11100000)
         {
             count ++;
             index += 3;
         }
-        else if ((str[index] & 0b11111000) == 0b11110000)
+        else if ((str[index] & 0b11110000) == 0b11110000)
         {
             count ++;
             index += 4;
@@ -294,36 +293,46 @@ int32_t codepoint_at(char str[], int32_t cpi)
     {
         return -1;
     }
-    int index = 0; 
-    int codepoint_index = 0; 
 
-    while (str[index] != '\0')
+    int start_byte_index = codepoint_index_to_byte_index(str, cpi);
+    int width_of_codepoint = width_from_start_byte(str[start_byte_index]);
+
+    unsigned char cp_array[4];
+
+    for (int i = 0; i < width_of_codepoint; i++)
     {
-    if(codepoint_index == cpi)
+        cp_array[i] = str[start_byte_index + i];
+    }
+
+    int32_t codepoint_value = 0;
+
+    if (width_of_codepoint == 4)
     {
-        unsigned char first_byte = (unsigned char) str[index];
-        if (str[index] <= 127) 
-        {
-            return str[index];
-        }
-        else if ((str[index] & 0b11100000) == 0b11000000)
-        {
-            return code_point2(str[index], str[index+1]);
-        }
-        else if ((str[index] & 0b11110000) == 0b11100000)
-        {
-            return code_point3(str[index], str[index+1], str[index+2]);
-        }
-        else if ((str[index] & 0b11111000) == 0b11110000)
-        {
-            return code_point4(str[index], str[index+1], str[index+2], str[index+3]);
-        }
+        codepoint_value = code_point4(cp_array[0], 
+        cp_array[1], cp_array[2], cp_array[3]);
+        return codepoint_value;
     }
-    int width = width_from_start_byte(str[index]);
-    index += width;
-    codepoint_index++;
+    else if (width_of_codepoint == 3)
+    {
+        codepoint_value = code_point3(cp_array[0], 
+        cp_array[1], cp_array[2]);
+        return codepoint_value;
     }
-    return -1;
+     else if (width_of_codepoint == 2)
+    {
+        codepoint_value = code_point2(cp_array[0], 
+        cp_array[1]);
+        return codepoint_value;
+    }
+    else if (width_of_codepoint == 1)
+    {
+        unsigned char value = str[start_byte_index];
+        return value;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 // ********************************************************
@@ -349,19 +358,21 @@ char is_animal_emoji_at(char str[], int32_t cpi)
         return 1;
     }
     return 0;
-
 }
 
 int main()
 {   
-
     unsigned char buffer[1000];
     unsigned char buffer_capped[1000];
 
     printf("%s\n", "Enter a UTF-8 encoded string: ");
     fgets(buffer, 1000, stdin);
 
-    buffer[strlen(buffer) - 1] = '\0';
+    int length = utf8_strlen(buffer);
+    if (length > 0 && buffer[length - 1] == '\n') 
+    {
+        buffer[length - 1] = '\0';
+    }
 
     printf("%s", "Valid ASCII: ");
     if (is_ascii(buffer) == 1)
@@ -383,38 +394,7 @@ int main()
     buffer_capped[index] = '\0';
 
     printf("%s%s\n", "Uppercased ASCII: ", buffer_capped);
-
-    int count_1 = 0;
-    int index_5 = 0;
-    while (buffer[index_5] != '\0')
-    {
-        if (buffer[index_5] <= 127)
-        {
-            count_1 ++;
-            index_5 ++;
-        }
-        else if ((buffer[index_5] & 0b11100000) == 0b11000000)
-        {
-            count_1 += 2;
-            index_5 += 2;
-        }
-        else if ((buffer[index_5] & 0b11110000) == 0b11100000)
-        {
-            count_1 += 3;
-            index_5 += 3;
-        }
-        else if ((buffer[index_5] & 0b11111000) == 0b11110000)
-        {
-            count_1 += 4;
-            index_5 += 4;
-        }
-        else 
-        {
-            index_5++;
-        }
-    }
-
-    printf("%s%d\n", "Length in bytes: ", count_1); 
+    printf("%s%d\n", "Length in bytes: ", utf8_strlen(buffer)); 
 
     int count = 0;
     int index_1 = 0;
@@ -543,9 +523,7 @@ int main()
     printf("%d ", code_points_decimal[y]);
     y++;
     }
-    code_points_decimal[y] = '\0';
     printf("\n");
-
 
     printf("%s", "Animal emojis: ");
 
@@ -575,8 +553,10 @@ int main()
         }
 
         }
+    
+
+printf("%s\n", animal_emoji); 
+
 return 0;
+
 }
-
-
-
