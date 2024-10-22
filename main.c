@@ -343,36 +343,37 @@ int32_t is_animal_emoji_at(char str[], int32_t cpi)
 }
 
 void next_utf8_char(char str[], int32_t cpi, char result[])
-{
-    int width = width_from_start_byte(str[cpi]);
+{   
+    int byte_index = codepoint_index_to_byte_index(str, cpi);
+    int width = width_from_start_byte(str[byte_index]);
 
     if (width == 1)
         {
-            result[0] = str[cpi] + 1;
+            result[0] = str[byte_index] + 1;
             result[1] = '\0';
             return;
         }
     else if (width == 2)
         {
-            result[0] = str[cpi];
-            result[1] = str[cpi + 1] + 1;
+            result[0] = str[byte_index];
+            result[1] = str[byte_index + 1] + 1;
             result[2] = '\0';
             return;
         }
     else if (width == 3)
         {
-            result[0] = str[cpi];
-            result[1] = str[cpi + 1];
-            result[2] = str[cpi + 2] + 1;
+            result[0] = str[byte_index];
+            result[1] = str[byte_index + 1];
+            result[2] = str[byte_index + 2] + 1;
             result[3] = '\0';
             return;
         }
     else if (width == 4)
         {
-            result[0] = str[cpi];
-            result[1] = str[cpi + 1];
-            result[2] = str[cpi + 2];
-            result[3] = str[cpi + 3] + 1;
+            result[0] = str[byte_index];
+            result[1] = str[byte_index + 1];
+            result[2] = str[byte_index + 2];
+            result[3] = str[byte_index + 3] + 1;
             result[4] = '\0';
             return;
         }
@@ -633,12 +634,9 @@ int main()
 
     /**PRINT NEXT CHARACTER OF CODEPOINT AT INDEX 3**/
     
-    char next_char[10];
+    char next_char[100];
     next_utf8_char(buffer, 3, next_char);
     printf("Next Character of Codepoint at Index 3: %s\n", next_char);
-
-
-    
 
 return 0;
 
