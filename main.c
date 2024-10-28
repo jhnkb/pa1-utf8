@@ -390,7 +390,7 @@ int main()
     fgets(buffer, 1000, stdin);
 
     //nullify the string
-    buffer[strlen(buffer) - 1] = '\0';
+    buffer[strcspn(buffer, "\n")] = 0;
 
     //**PRINTING IF VALID ASCII**/
     printf("%s", "Valid ASCII: ");
@@ -641,6 +641,5 @@ int main()
 return 0;
 
 }
-
 
 
