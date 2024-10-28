@@ -15,3 +15,5 @@ I also used ChatGPT, with the prompt
 "why am i getting segmentation core dumped"
 
 ChatGPT replied with the usual suspects like array out of bounds, stack overflow, bufferoverflow etc... but I still was not able to find the culprit. I then sent ChatGPT a bit of my code where I thought the error was coming from. ChatGPT suggested a tool called valgrind and I thought that was helpful because I was able to pinpoint where my issues were. I was actually close but ChatGPT/Valgrind helped me find the specific issue. 
+
+https://herolab.usd.de/en/the-security-risks-of-overlong-utf-8-encodings/, From Unicode to Exploit: The Security Risks of Overlong UTF-8 Encodings
